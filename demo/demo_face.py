@@ -3,13 +3,45 @@ import re
 from deepface import DeepFace
 from pathlib import Path
 from loguru import logger
+
 from config import DATA
 
 
-class VIPFace:
+class FaceRec:
     def __init__(self, **kwargs):
         self.db_path = kwargs.get('db_path', str(Path(DATA, "vip_images")))
         self.THRESHOLD = kwargs.get('THRESHOLD', 60)
+
+    def center_crop(self, frame, ratio=0.6):
+        height, width = frame.shape[:2]
+
+        crop_w = int(width * ratio)
+        crop_h = int(height * ratio)
+
+        x1 = (width - crop_w) // 2
+        y1 = (height - crop_h) // 2
+        x2 = x1 + crop_w
+        y2 = y1 + crop_h
+
+        crop = frame[y1:y2, x1:x2]
+
+        return crop
+
+    def get_center_face(self, results, height, width):
+        x_center, y_center = width // 2, height // 2
+
+        min_dist = 99999
+        min_idx = -1
+        for idx, df in enumerate(results):
+            r = df.iloc[0]
+            x, y, w, h = int(r["source_x"]), int(r["source_y"]), int(r["source_w"]), int(r["source_h"])
+            xc, yc = x + w // 2, y + h // 2
+            dist = (x_center - xc) * (x_center - xc) + (y_center - yc) * (y_center - yc)
+            if dist < min_dist:
+                min_dist = dist
+                min_idx = idx
+
+        return min_idx
 
     def draw_face(self, frame, r, name):
         x, y, w, h = int(r["source_x"]), int(r["source_y"]), int(r["source_w"]), int(r["source_h"])
@@ -42,6 +74,8 @@ class VIPFace:
             if not ret:
                 break
 
+            frame = self.center_crop(frame, ratio=0.6)
+
             try:
                 results = DeepFace.find(
                     img_path=frame,
@@ -53,7 +87,11 @@ class VIPFace:
 
                 if len(results) > 0:  # detected
                     logger.debug(f"Detected no. of faces: {len(results)}")
-                    df = results[0]
+
+                    height, width = frame.shape[:2]
+                    min_idx = self.get_center_face(results, height, width)
+
+                    df = results[min_idx]
                     row = df.iloc[0]
                     logger.info(f"Row: {row}")
 
@@ -84,8 +122,8 @@ class VIPFace:
 
 
 def main():
-    vip_face = VIPFace()
-    vip_face.run()
+    face_rec = FaceRec()
+    face_rec.run()
 
 
 if __name__ == '__main__':
