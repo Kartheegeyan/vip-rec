@@ -66,8 +66,8 @@ class FaceRec:
         return frame
 
     def run(self, **kwargs):
-        port = kwargs.get('port', '/dev/video0')
-        cap = cv2.VideoCapture(port)
+        device_id = kwargs.get('device_id', '/dev/video0')
+        cap = cv2.VideoCapture(device_id)
 
         while True:
             ret, frame = cap.read()

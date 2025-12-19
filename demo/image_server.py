@@ -309,7 +309,7 @@ if __name__ == "__main__":
         'fps': 30,
         'head_camera_type': 'opencv',
         'head_camera_image_shape': [720, 1280],  # Head camera resolution
-        'head_camera_id_numbers': [6],
+        'head_camera_id_numbers': [2],
     }
 
     server = ImageServer(config, Unit_Test=False)
