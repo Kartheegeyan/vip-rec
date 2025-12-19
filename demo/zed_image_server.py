@@ -70,5 +70,5 @@ class ImageServer:
 
 
 if __name__ == "__main__":
-    server = ImageServer()
+    server = ImageServer(device_id='/dev/video6')
     server.send_process()

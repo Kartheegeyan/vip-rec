@@ -65,6 +65,45 @@ class FaceRec:
 
         return frame
 
+    def recognize(self, frame):
+        frame = self.center_crop(frame, ratio=0.6)
+
+        results = DeepFace.find(
+            img_path=frame,
+            db_path=self.db_path,
+            model_name="ArcFace",
+            detector_backend="retinaface",
+            enforce_detection=False
+        )
+
+        if len(results) > 0 and len(results[0])>0:  # detected
+            logger.debug(f"Detected no. of faces: {len(results)}")
+            print(results)
+
+            height, width = frame.shape[:2]
+            min_idx = self.get_center_face(results, height, width)
+
+            df = results[min_idx]
+            row = df.iloc[0]
+            logger.info(f"Row: {row}")
+
+            if row['confidence'] <= self.THRESHOLD:  # detected and face not in DB
+                name = 'UNKNOWN'
+            else:  # detected and face in DB
+                identity = Path(row['identity']).stem
+                name = identity
+                name = re.sub(r"\s*\d+$", "", name)
+
+            frame = self.draw_face(frame, row, name)
+
+            logger.info(f"Identity: {name}")
+            logger.info(f"Confidence: {row['confidence']}, Distance: {row['distance']}")
+
+            return frame, name
+
+        else:  # no face detected
+            return frame, None
+
     def run(self, **kwargs):
         device_id = kwargs.get('device_id', '/dev/video0')
         cap = cv2.VideoCapture(device_id)
@@ -74,41 +113,8 @@ class FaceRec:
             if not ret:
                 break
 
-            frame = self.center_crop(frame, ratio=0.6)
-
             try:
-                results = DeepFace.find(
-                    img_path=frame,
-                    db_path=self.db_path,
-                    model_name="ArcFace",
-                    detector_backend="retinaface",
-                    enforce_detection=False
-                )
-
-                if len(results) > 0:  # detected
-                    logger.debug(f"Detected no. of faces: {len(results)}")
-
-                    height, width = frame.shape[:2]
-                    min_idx = self.get_center_face(results, height, width)
-
-                    df = results[min_idx]
-                    row = df.iloc[0]
-                    logger.info(f"Row: {row}")
-
-                    if row['confidence'] <= self.THRESHOLD:  # detected and face not in DB
-                        name = 'UNKNOWN'
-                    else:  # detected and face in DB
-                        identity = Path(row['identity']).stem
-                        name = identity
-                        name = re.sub(r"\s*\d+$", "", name)
-
-                    frame = self.draw_face(frame, row, name)
-
-                    logger.info(f"Identity: {name}")
-                    logger.info(f"Confidence: {row['confidence']}, Distance: {row['distance']}")
-
-                else:  # no face detected
-                    pass
+                frame, name = self.recognize(frame)
 
             except Exception as e:
                 logger.error(f"Error: {e}")
