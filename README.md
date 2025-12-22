@@ -17,6 +17,14 @@ Then go to the root of this project
 uv pip install -e .
 ```
 
+# Prepare Images
+Please create a image folder:
+/home/rfouyang/workspace/data/vip_images
+
+The folder must be created, otherwise the code will crash.
+
+And put people's images in jpg format in the folder to support face recognition. Name the image as "[name] [number].jpg"
+
 # Execution
 On robot /home/unitree/workspace/services/airshow
 
