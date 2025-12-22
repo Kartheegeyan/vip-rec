@@ -8,15 +8,24 @@ import threading
 from util.face_helper import FaceRec
 from util.g1_helper import G1
 
+def get_greeting_text(name: str) -> str:
+    if name == 'UNKNOWN':
+        return 'Hello, welcome to the airshow!'
+    else:
+        return f"Hello, {name}, welcome to the airshow!"
 
 def greet(robot, name):
-    if name == 'UNKNOWN':
-        wav_path = robot.gen_wave('Hello, welcome to the airshow!')
-        robot.play_wav(wav_path)
-    else:
-        wav_path = robot.gen_wave(f"Hello, {name}, welcome to the airshow!")
-        robot.play_wav(wav_path)
-    robot.wave_hand()
+    text = get_greeting_text(name)
+    wav_path = robot.gen_wave(text)
+
+    speech_thread = threading.Thread(target=robot.play_wav, args=(wav_path,))
+    motion_thread = threading.Thread(target=robot.wave_hand)
+
+    speech_thread.start()
+    motion_thread.start()
+
+    speech_thread.join()
+    motion_thread.join()
 
 
 class ImageClient:
