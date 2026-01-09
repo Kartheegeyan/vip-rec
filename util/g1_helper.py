@@ -1,3 +1,4 @@
+import threading
 import time
 from enum import IntEnum
 from pathlib import Path
@@ -10,6 +11,7 @@ from unitree_sdk2py.g1.arm.g1_arm_action_client import G1ArmActionClient
 from unitree_sdk2py.g1.arm.g1_arm_action_client import action_map
 from util.wav import read_wav, play_pcm_stream
 from util.edgetts_helper import EdgeTTS
+from util.g1_conversational_gesture import ConversationGesture
 
 
 class Language(IntEnum):
@@ -19,7 +21,7 @@ class Language(IntEnum):
 
 class G1:
     def __init__(self, **kwargs):
-        network_interface = kwargs.get('network_interface', 'enp108s0')
+        network_interface = kwargs.get('network_interface', 'enp131s0')
         ChannelFactoryInitialize(0, network_interface)
 
         self.audio_client = AudioClient()
@@ -34,7 +36,8 @@ class G1:
         self.arm_client.SetTimeout(10.0)
         self.arm_client.Init()
 
-
+        # Custom Action Class
+        self.custom_action = ConversationGesture()
 
         self.state = 'idle'
 
@@ -81,15 +84,50 @@ class G1:
         self.arm_client.ExecuteAction(action_map.get("release arm"))
         self.state = 'idle'
 
+    def conversation_gesture(self, direction):
+        self.state = 'busy'
+        self.custom_action.conversation_gesture(direction)
+        self.state = 'idle'
+
+
+# def greet(robot, name):
+#     if name == 'UNKNOWN':
+#         wav_path = robot.gen_wave('Hello, welcome to the airshow!')
+#         robot.play_wav(wav_path)
+#     else:
+#         wav_path = robot.gen_wave(f"Hello, {name}, welcome to the airshow!")
+#         robot.play_wav(wav_path)
+#     robot.wave_hand()
+
+def get_greeting_text(name: str) -> str:
+    if name == 'UNKNOWN':
+        return 'Hello, welcome to the airshow!'
+    else:
+        return f"Hello, {name}, welcome to the airshow!"
+
+# A reusable function that takes in a wav file and a robot action to execute as a sequence simultaneously
+def sequence(robot, wav_path, action_func):
+    speech_thread = threading.Thread(target=robot.play_wav, args=(wav_path,))
+    action_thread = threading.Thread(target=action_func)
+
+    speech_thread.start()
+    action_thread.start()
+
+    speech_thread.join()
+    action_thread.join() 
 
 def greet(robot, name):
-    if name == 'UNKNOWN':
-        wav_path = robot.gen_wave('Hello, welcome to the airshow!')
-        robot.play_wav(wav_path)
-    else:
-        wav_path = robot.gen_wave(f"Hello, {name}, welcome to the airshow!")
-        robot.play_wav(wav_path)
-    robot.wave_hand()
+    text = get_greeting_text(name)
+    wav_path = robot.gen_wave(text)
+
+    speech_thread = threading.Thread(target=robot.play_wav, args=(wav_path,))
+    motion_thread = threading.Thread(target=robot.wave_hand)
+
+    speech_thread.start()
+    motion_thread.start()
+
+    speech_thread.join()
+    motion_thread.join()
 
 
 if __name__ == "__main__":
@@ -101,6 +139,20 @@ if __name__ == "__main__":
     # wav_path = robot.gen_wave('Hi Ruofei, nice to meet you')
     # robot.play_wav(wav_path)
 
-    greet(robot, "Karthe")
+    text1 = "Today, we will be demonstrating autonomous pick and place capabilities."
+    wav_path1 = robot.gen_wave(text1)
 
-    # robot.heart()
+    text2 = "The robot will use Artificial Intelligence to identify objects using its camera and generate the required action to pick and place the item in the basket."
+    wav_path2 = robot.gen_wave(text2)
+
+    text3 = "Let's begin the demonstration!"
+    wav_path3 = robot.gen_wave(text3)
+
+    greet(robot, "Karthee")
+
+    robot.play_wav(wav_path1)
+
+    if robot.state == 'idle':
+        sequence(robot, wav_path2, lambda: robot.conversation_gesture("left"))
+
+    robot.play_wav(wav_path3)
