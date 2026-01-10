@@ -95,6 +95,7 @@ class ConversationGesture:
         self.target_pos = None
         self.start_pos = None
 
+        # Joint positions for gestures
         self.initial_pos = [
             0.18, 0.2, 0.23, 1.15, 0.3, 0., 0.2,
             0.18, -0.2, -0.23, 1.15, -0.3, 0., -0.2, 
@@ -109,6 +110,18 @@ class ConversationGesture:
             0.18, 0.2, 0.23, 1.15, 0.3, 0., 0.2,
             0., 0.,  -1.17, -0.19, kPi_2, 0., 0.,
             -0.5, 0, 0
+        ]
+
+        self.neutral_gesture_pos = [
+            0., 0.1, -(kPi_2/4), 0.2, 0., 0., 0.,
+            0., -0.1, (kPi_2/4), 0.2, 0., 0., 0., 
+            0, 0, 0
+        ]
+
+        self.open_gesture_pos = [
+            0., 0.,  0.8, -0.19, -kPi_2, 0., 0.,
+            0., 0.,  -0.8, -0.19, kPi_2, 0., 0.,
+            0, 0, 0
         ]
 
         self.arm_joints = [
@@ -233,6 +246,28 @@ class ConversationGesture:
             self.target_pos = self.left_gesture
         elif direction == 'right':
             self.target_pos = self.right_gesture
+        self.Init()
+        self.Start()
+
+        while True:        
+            time.sleep(1)
+            if self.done: 
+               print("Done!")
+               sys.exit(-1)
+    
+    def neutral_gesture(self):
+        self.target_pos = self.neutral_gesture_pos
+        self.Init()
+        self.Start()
+
+        while True:        
+            time.sleep(1)
+            if self.done: 
+               print("Done!")
+               sys.exit(-1)
+    
+    def open_gesture(self):
+        self.target_pos = self.open_gesture_pos
         self.Init()
         self.Start()
 
