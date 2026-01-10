@@ -89,6 +89,16 @@ class G1:
         self.custom_action.conversation_gesture(direction)
         self.state = 'idle'
 
+    def neutral_gesture(self):
+        self.state = 'busy'
+        self.custom_action.neutral_gesture()
+        self.state = 'idle'
+
+    def open_gesture(self):
+        self.state = 'busy'
+        self.custom_action.open_gesture()
+        self.state = 'idle'
+
 
 # def greet(robot, name):
 #     if name == 'UNKNOWN':
