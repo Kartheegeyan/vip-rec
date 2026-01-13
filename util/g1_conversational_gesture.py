@@ -104,23 +104,23 @@ class ConversationGesture:
         self.left_gesture = [
             0., 0.,  1.17, -0.19, -kPi_2, 0., 0.,
             0.18, -0.2, -0.23, 1.15, -0.3, 0., -0.2, 
-            0.5, 0, 0
+            0, 0, 0
         ]
         self.right_gesture = [
             0.18, 0.2, 0.23, 1.15, 0.3, 0., 0.2,
             0., 0.,  -1.17, -0.19, kPi_2, 0., 0.,
-            -0.5, 0, 0
+            0, 0, 0
         ]
 
         self.neutral_gesture_pos = [
-            0., 0.1, -(kPi_2/4), 0.2, 0., 0., 0.,
-            0., -0.1, (kPi_2/4), 0.2, 0., 0., 0., 
+            0., 0.7, -(kPi_2/2), -0.2, -(kPi_2/4), 0., 0.,
+            0., -0.7, (kPi_2/2), -0.2, (kPi_2/4), 0., 0., 
             0, 0, 0
         ]
 
         self.open_gesture_pos = [
-            0., 0.,  0.8, -0.19, -kPi_2, 0., 0.,
-            0., 0.,  -0.8, -0.19, kPi_2, 0., 0.,
+            0., 0.5,  0.8, -0.19, -(kPi_2/2), 0., 0.,
+            0., -0.5,  -0.8, -0.19, (kPi_2/2), 0., 0.,
             0, 0, 0
         ]
 
@@ -140,8 +140,8 @@ class ConversationGesture:
 
     def Init(self):
         # create publisher #
-        self.arm_sdk_publisher = ChannelPublisher("rt/arm_sdk", LowCmd_)
-        # self.arm_sdk_publisher = ChannelPublisher("rt/lowcmd", LowCmd_)
+        self.arm_sdk_publisher = ChannelPublisher("rt/arm_sdk", LowCmd_) # Robot Control
+        # self.arm_sdk_publisher = ChannelPublisher("rt/lowcmd", LowCmd_) # Mujoco Sim
         self.arm_sdk_publisher.Init()
 
         # create subscriber # 
