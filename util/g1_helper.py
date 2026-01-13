@@ -22,7 +22,7 @@ class Language(IntEnum):
 class G1:
     def __init__(self, **kwargs):
         network_interface = kwargs.get('network_interface', 'enp131s0')
-        ChannelFactoryInitialize(0, network_interface)
+        ChannelFactoryInitialize(0, network_interface) # 0: Robot, 1: Simulator
 
         self.audio_client = AudioClient()
         self.audio_client.SetTimeout(10.0)
@@ -149,20 +149,22 @@ if __name__ == "__main__":
     # wav_path = robot.gen_wave('Hi Ruofei, nice to meet you')
     # robot.play_wav(wav_path)
 
-    text1 = "Today, we will be demonstrating autonomous pick and place capabilities."
-    wav_path1 = robot.gen_wave(text1)
+    # text1 = "Today, we will be demonstrating autonomous pick and place capabilities."
+    # wav_path1 = robot.gen_wave(text1)
 
-    text2 = "The robot will use Artificial Intelligence to identify objects using its camera and generate the required action to pick and place the item in the basket."
-    wav_path2 = robot.gen_wave(text2)
+    # text2 = "The robot will use Artificial Intelligence to identify objects using its camera and generate the required action to pick and place the item in the basket."
+    # wav_path2 = robot.gen_wave(text2)
 
-    text3 = "Let's begin the demonstration!"
-    wav_path3 = robot.gen_wave(text3)
+    # text3 = "Let's begin the demonstration!"
+    # wav_path3 = robot.gen_wave(text3)
 
-    greet(robot, "Karthee")
+    # greet(robot, "Karthee")
 
-    robot.play_wav(wav_path1)
+    # robot.play_wav(wav_path1)
 
-    if robot.state == 'idle':
-        sequence(robot, wav_path2, lambda: robot.conversation_gesture("left"))
+    # if robot.state == 'idle':
+    #     sequence(robot, wav_path2, lambda: robot.conversation_gesture("left"))
 
-    robot.play_wav(wav_path3)
+    # robot.play_wav(wav_path3)
+
+    robot.neutral_gesture()
